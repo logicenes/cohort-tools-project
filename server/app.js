@@ -31,6 +31,15 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 
 
+
+// ROUTES - https://expressjs.com/en/starter/basic-routing.html
+// Devs Team - Start working on the routes here:
+// ...
+app.get("/docs", (req, res) => {
+  res.sendFile(__dirname + "/views/docs.html");
+});
+
+
 // GET /cohorts - retrieve all the cohorts
 app.get("/api/cohorts", (req, res) => {
   Cohort.find({})
@@ -193,16 +202,6 @@ app.delete("/api/students/:studentId", (req, res, next) => {
       res.status(500).send({ error: "Failed to delete Student" })
     })
 })
-
-
-
-
-// ROUTES - https://expressjs.com/en/starter/basic-routing.html
-// Devs Team - Start working on the routes here:
-// ...
-app.get("/docs", (req, res) => {
-  res.sendFile(__dirname + "/views/docs.html");
-});
 
 
 
