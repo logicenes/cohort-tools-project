@@ -14,7 +14,7 @@ const Student = require("./models/Student.model")
 const app = express();
 
 // connecting to database
- 
+
 mongoose
   .connect("mongodb://127.0.0.1:27017/cohort-tools-api")
   .then(x => console.log(`Connected to Database: "${x.connections[0].name}"`))
@@ -44,9 +44,85 @@ app.get("/api/cohorts", (req, res) => {
     });
 });
 
+//  POST  /cohort route
+
+app.post("/api/cohorts", (req, res, next) => {
+  const newCohort = req.body;
+
+  Cohort.create(newCohort)
+    .then((cohortFromDB) => {
+      res.status(201).json(cohortFromDB)
+    })
+    .catch((error) => {
+      console.error("Error creating a new Cohort in the DB..", error)
+      res.status(500).json({ error: "Failed to creat a new Cohort" })
+    })
+})
+
+// GET /students/cohort/:cohortId
+
+app.get("/api/students/cohort/:cohortId", (req, res) => {
+  Student.find({ cohort: req.params.cohortId })
+    .populate("cohort")
+    .then(students => res.json(students))
+    .catch((error) => {
+      console.error("Error retrieving Students by Cohort", error);
+      res.status(500).json({ error: "Failed to retrieve Students by Cohort" });
+    });
+});
+
+//  GET  /cohorts/:id route
+app.get("/api/cohorts/:cohortId", (req, res, next) => {
+  const { cohortId } = req.params
+
+  Cohort.findById(cohortId)
+    .then((cohortFromDB) => {
+      res.json(cohortFromDB)
+    })
+    .catch((error) => {
+      console.error("Error while retrieving Cohort", error)
+      res.status(500).send({ error: "Failed to retrieve Cohort" })
+    })
+})
+
+//  PUT (update) /cohorts/:id route
+app.put("/api/cohorts/:cohortId", (req, res, next) => {
+  const { cohortId } = req.params
+  const newDetails = req.body
+
+  Cohort.findByIdAndUpdate(cohortId, newDetails, { new: true })
+    .then((cohortFromDB) => {
+      res.json(cohortFromDB)
+    })
+    .catch((error) => {
+      console.error("Error updating Cohort", error)
+      res.status(500).send({ error: "Failed to update Cohort" })
+    })
+})
+
+//  DELETE  /cohorts/:id route
+
+app.delete("/api/cohorts/:cohortId", (req, res, next) => {
+
+  const { cohortId } = req.params
+
+  Cohort.findByIdAndDelete(cohortId)
+    .then((response) => {
+      res.sendStatus(204)
+    })
+    .catch((error) => {
+      console.error("Error while deleting Cohort", error)
+      res.status(500).send({ error: "Failed to delete Cohort" })
+    })
+})
+
+
+
+
 // GET /students - retrieve all the students
 app.get("/api/students", (req, res) => {
   Student.find({})
+    .populate("cohort")
     .then((students) => {
       console.log("Retrieved students ->", students);
       res.json(students);
@@ -56,6 +132,70 @@ app.get("/api/students", (req, res) => {
       res.status(500).send({ error: "Failed to retrieve students" });
     });
 });
+
+//  POST  /students route
+
+app.post("/api/students", (req, res, next) => {
+  const newStudent = req.body;
+
+  Student.create(newStudent)
+    .then((studentFromDB) => {
+      res.status(201).json(studentFromDB)
+    })
+    .catch((error) => {
+      console.error("Error creating a new Student in the DB..", error)
+      res.status(500).json({ error: "Failed to creat a new Student" })
+    })
+})
+
+//  GET  /students/:id route
+app.get("/api/students/:studentId", (req, res, next) => {
+  const { studentId } = req.params
+
+  Student.findById(studentId)
+    .populate("cohort")
+    .then((studentFromDB) => {
+      res.json(studentFromDB)
+    })
+    .catch((error) => {
+      console.error("Error while retrieving Student", error)
+      res.status(500).send({ error: "Failed to retrieve Student" })
+    })
+})
+
+//  PUT (update) /students/:id route
+app.put("/api/students/:studentId", (req, res, next) => {
+  const { studentId } = req.params
+  const newDetails = req.body
+
+  Student.findByIdAndUpdate(studentId, newDetails, { new: true })
+    .then((studentFromDB) => {
+      res.json(studentFromDB)
+    })
+    .catch((error) => {
+      console.error("Error updating Student", error)
+      res.status(500).send({ error: "Failed to update Student" })
+    })
+})
+
+//  DELETE  /students/:id route
+
+app.delete("/api/students/:studentId", (req, res, next) => {
+
+  const { studentId } = req.params
+
+  Student.findByIdAndDelete(studentId)
+    .then((response) => {
+      res.sendStatus(204)
+    })
+    .catch((error) => {
+      console.error("Error while deleting Student", error)
+      res.status(500).send({ error: "Failed to delete Student" })
+    })
+})
+
+
+
 
 // ROUTES - https://expressjs.com/en/starter/basic-routing.html
 // Devs Team - Start working on the routes here:
